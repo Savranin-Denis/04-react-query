@@ -7,7 +7,7 @@ import MovieGrid from '../MovieGrid/MovieGrid';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import Loader from '../Loader/Loader';
 import MovieModal from '../MovieModal/MovieModal';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import ReactPaginateModule from 'react-paginate';
 import type { ReactPaginateProps } from 'react-paginate';
 import type { ComponentType } from 'react';
@@ -27,10 +27,11 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isPlaceholderData } = useQuery({
     queryKey: ['films', searchQuery, page],
     queryFn: () => fetchMovies(searchQuery, page),
     enabled: searchQuery !== '',
+    placeholderData: keepPreviousData,
   });
 
   const films = data?.results ?? [];
@@ -50,10 +51,16 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (!isLoading && searchQuery && films.length === 0 && !isError) {
+    if (
+      !isLoading &&
+      searchQuery &&
+      films.length === 0 &&
+      !isError &&
+      !isPlaceholderData
+    ) {
       toast.error('No movies found for your request.');
     }
-  }, [films.length, isLoading, searchQuery, isError]);
+  }, [films.length, isLoading, searchQuery, isError, isPlaceholderData]);
 
   return (
     <>
