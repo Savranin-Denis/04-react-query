@@ -6,16 +6,21 @@ const BASE_URL = 'https://api.themoviedb.org/3/search/movie';
 
 interface Response {
   results: Movie[];
+  total_pages: number;
 }
 
-export async function fetchMovies(query: string): Promise<Movie[]> {
+export async function fetchMovies(
+  query: string,
+  page: number
+): Promise<Response> {
   const response = await axios.get<Response>(BASE_URL, {
     params: {
       query,
+      page,
     },
     headers: {
       Authorization: `Bearer ${myKey}`,
     },
   });
-  return response.data.results;
+  return response.data;
 }
